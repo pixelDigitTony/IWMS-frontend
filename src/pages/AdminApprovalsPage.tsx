@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { http } from '@/api/baseApi';
-import { Button } from '@/shared/ui/Button';
+import { Button } from '@/components/ui/button';
 
 type PendingUser = { id: string; email: string };
 

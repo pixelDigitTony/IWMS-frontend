@@ -219,7 +219,7 @@ Environment variables (Vite `import.meta.env`):
 ```
 VITE_API_BASE_URL=                      # Render backend URL
 VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+VITE_SUPABASE_PUBLISHABLE_KEY=          # use publishable key (legacy: VITE_SUPABASE_ANON_KEY)
 VITE_R2_PUBLIC_BASE_URL=                # Optional public CDN base if reading directly
 VITE_ORG_ID=                            # Optional: org scoping for API requests
 VITE_WAREHOUSE_ID=                      # Optional default warehouse context

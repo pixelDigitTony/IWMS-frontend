@@ -2,7 +2,7 @@ import axios from 'axios';
 import { env } from '@/shared/config/env';
 import { supabase } from '@/shared/config/supabase';
 
-export const http = axios.create({ baseURL: env.apiBaseUrl });
+export const http = axios.create({ baseURL: env.apiBaseUrl, withCredentials: true });
 
 http.interceptors.request.use(async (config) => {
   const session = (await supabase.auth.getSession()).data.session;

@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getAuthStatus } from '@/api/authApi';
-import { Button } from '@/shared/ui/Button';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/shared/config/supabase';
 
 export function AppLayout() {

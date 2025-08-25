@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { presignUpload, uploadToPresignedUrl } from '../api';
-import { Button } from '@/shared/ui/Button';
+import { Button } from '@/components/ui/button';
 
 type Props = { folder?: string };
 

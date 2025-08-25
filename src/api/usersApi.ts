@@ -19,4 +19,8 @@ export async function createUser(email: string) {
   return data;
 }
 
+export async function registerSelf(email: string) {
+  await http.post(`/users/register`, { email });
+}
+
 

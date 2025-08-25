@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listUsers } from '@/features/users/api';
 import { createUser } from '@/api/usersApi';
 import { useState } from 'react';
-import { Button } from '@/shared/ui/Button';
+import { Button } from '@/components/ui/button';
 
 export function UsersPage() {
   const qc = useQueryClient();

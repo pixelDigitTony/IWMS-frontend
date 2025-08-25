@@ -22,8 +22,4 @@ export async function getAuthStatus() {
   return data;
 }
 
-export async function bootstrapRoles() {
-  await http.post('/auth/bootstrap', {});
-}
-
 

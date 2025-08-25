@@ -8,7 +8,7 @@ import { AuthGatePage } from '@/pages/AuthGatePage';
 import { AppLayout } from '@/app/layout/AppLayout';
 import { AdminApprovalsPage } from '@/pages/AdminApprovalsPage';
 
-export function AppRouter() {
+export function Router() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
