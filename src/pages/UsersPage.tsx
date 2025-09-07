@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listUsers } from '@/features/users/api';
-import { createUser } from '@/api/usersApi';
+import { createUser, isSuperAdmin } from '@/api/usersApi';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
@@ -35,7 +35,7 @@ export function UsersPage() {
               <tr key={u.id} className="border-t">
                 <td className="p-2">{u.email}</td>
                 <td className="p-2">{u.approved ? 'Yes' : 'No'}</td>
-                <td className="p-2">{u.superAdmin ? 'Yes' : 'No'}</td>
+                <td className="p-2">{isSuperAdmin(u) ? 'Yes' : 'No'}</td>
               </tr>
             ))}
           </tbody>

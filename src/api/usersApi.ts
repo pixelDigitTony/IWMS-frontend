@@ -4,10 +4,21 @@ export type UserDto = {
   id: string;
   email: string;
   displayName?: string;
+  companyName?: string;
   roles?: string[];
   approved?: boolean;
-  superAdmin?: boolean;
 };
+
+export type RegisterRequest = {
+  email: string;
+  displayName?: string;
+  companyName?: string;
+};
+
+// Helper function to check if user is super admin based on roles
+export function isSuperAdmin(user: UserDto): boolean {
+  return user.roles?.includes('SUPER_ADMIN') ?? false;
+}
 
 export async function listUsers() {
   const { data } = await http.get<UserDto[]>(`/users`);
@@ -19,8 +30,8 @@ export async function createUser(email: string) {
   return data;
 }
 
-export async function registerSelf(email: string) {
-  await http.post(`/users/register`, { email });
+export async function registerSelf(request: RegisterRequest) {
+  await http.post(`/users/register`, request);
 }
 
 

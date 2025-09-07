@@ -17,9 +17,15 @@ export async function getSession() {
 }
 
 export type AuthStatus = { approved: boolean; roles?: string[]; permissions?: string[] };
+
 export async function getAuthStatus() {
   const { data } = await http.get<AuthStatus>('/auth/status');
   return data;
+}
+
+// Helper function to check if user is super admin based on auth status
+export function isSuperAdmin(status: AuthStatus): boolean {
+  return status.roles?.includes('SUPER_ADMIN') ?? false;
 }
 
 

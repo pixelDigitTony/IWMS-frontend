@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getAuthStatus } from '@/api/authApi';
+import { getAuthStatus, isSuperAdmin } from '@/api/authApi';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/shared/config/supabase';
 
@@ -19,7 +19,7 @@ export function AppLayout() {
         <div className="text-lg font-semibold mb-4">IWMS</div>
         <nav className="space-y-1 text-sm">
           <NavItem to="/dashboard" label="Dashboard" />
-          {status?.superAdmin && <NavItem to="/admin/approvals" label="Approval Queue" />}
+          {status && isSuperAdmin(status) && <NavItem to="/admin/approvals" label="Approval Queue" />}
           <NavItem to="/users" label="Users" />
         </nav>
       </aside>

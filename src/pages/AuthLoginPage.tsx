@@ -10,20 +10,57 @@ import { Loader2 } from 'lucide-react';
 export function AuthLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  // Validation functions
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // Email validation
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    // Password validation
+    if (!password) {
+      newErrors.password = 'Password is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true); setError(null);
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setBusy(true);
+    setErrors({});
+    setSuccess(false);
+
     try {
       await signInWithPassword(email, password);
-      toast.success('Signed in');
-      navigate('/gate');
+      setSuccess(true);
+      toast.success('Welcome back!', {
+        description: 'You have been successfully signed in.'
+      });
+
+      // Navigate after a short delay to show success state
+      setTimeout(() => {
+        navigate('/gate');
+      }, 1000);
     } catch (err: any) {
-      setError(err.message || 'Login failed');
-      toast.error(err.message || 'Login failed');
+      const errorMessage = err.message || 'Login failed';
+      setErrors({ general: errorMessage });
+      toast.error(errorMessage);
     } finally {
       setBusy(false);
     }
