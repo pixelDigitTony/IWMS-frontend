@@ -22,7 +22,7 @@ export function AppLayout() {
           <NavItem to="/warehouses" label="Warehouses & Locations" />
           <NavItem to="/products" label="Products & Lots" />
           <NavItem to="/inventory" label="Inventory" />
-          <NavItem to="/transfers" label="Transfers" />
+          <NavItem to="/transfers" label="Inter-Warehouse Transfers" />
           <NavItem to="/receiving" label="Receiving" />
           <NavItem to="/shipping" label="Shipping" />
           <NavItem to="/reports" label="Reports" />
