@@ -19,6 +19,13 @@ export function AppLayout() {
         <div className="text-lg font-semibold mb-4">IWMS</div>
         <nav className="space-y-1 text-sm">
           <NavItem to="/dashboard" label="Dashboard" />
+          <NavItem to="/warehouses" label="Warehouses & Locations" />
+          <NavItem to="/products" label="Products & Lots" />
+          <NavItem to="/inventory" label="Inventory" />
+          <NavItem to="/transfers" label="Transfers" />
+          <NavItem to="/receiving" label="Receiving" />
+          <NavItem to="/shipping" label="Shipping" />
+          <NavItem to="/reports" label="Reports" />
           {status && isSuperAdmin(status) && <NavItem to="/admin/approvals" label="Approval Queue" />}
           <NavItem to="/users" label="Users" />
         </nav>
