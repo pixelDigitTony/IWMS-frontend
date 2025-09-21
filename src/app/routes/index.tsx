@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { DashboardPage, WarehousesPage, ProductsPage, InventoryPage, TransfersPage, ReceivingPage, ShippingPage, UsersPage, ReportsPage } from '@/pages';
+import { DashboardPage, WarehousesPage, ProductsPage, InventoryPage, TransfersPage, ReceivingPage, ShippingPage, UsersPage, ReportsPage, AttachmentsPage } from '@/pages';
 import { RequireAuth } from '@/features/auth/components/RequireAuth';
 import { PublicRoute } from '@/features/auth/components/PublicRoute';
 import { AuthLoginPage } from '@/pages/AuthLoginPage';
@@ -25,7 +25,8 @@ export function Router() {
         <Route path="/shipping" element={<RequireAuth><ShippingPage /></RequireAuth>} />
         <Route path="/users" element={<RequireAuth requiredPermission="users.manage"><UsersPage /></RequireAuth>} />
         <Route path="/admin/approvals" element={<RequireAuth><AdminApprovalsPage /></RequireAuth>} />
-        <Route path="/reports" element={<RequireAuth requiredPermission="reports.view"><ReportsPage /></RequireAuth>} />
+        <Route path="/reports" element={<RequireAuth><ReportsPage /></RequireAuth>} />
+        <Route path="/attachments" element={<RequireAuth><AttachmentsPage /></RequireAuth>} />
       </Route>
     </Routes>
   );

@@ -23,11 +23,12 @@ export function AppLayout() {
           <NavItem to="/products" label="Products & Lots" />
           <NavItem to="/inventory" label="Inventory" />
           <NavItem to="/transfers" label="Inter-Warehouse Transfers" />
-          <NavItem to="/receiving" label="Receiving" />
-          <NavItem to="/shipping" label="Shipping" />
-          <NavItem to="/reports" label="Reports" />
-          {status && isSuperAdmin(status) && <NavItem to="/admin/approvals" label="Approval Queue" />}
-          <NavItem to="/users" label="Users" />
+        <NavItem to="/receiving" label="Receiving (Inbound)" />
+        <NavItem to="/shipping" label="Shipping (Outbound)" />
+        <NavItem to="/reports" label="Reports" />
+        <NavItem to="/attachments" label="Attachments & Documents" />
+        {status && isSuperAdmin(status) && <NavItem to="/admin/approvals" label="Approval Queue" />}
+        <NavItem to="/users" label="Users" />
         </nav>
       </aside>
       <header className="col-start-2 flex items-center justify-between px-4 border-b bg-white">
