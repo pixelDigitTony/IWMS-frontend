@@ -1,12 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { listUsers } from '@/features/users/api';
-import { createUser, isSuperAdmin } from '@/api/usersApi';
-import { useState } from 'react';
+import { createUser, deleteUser, isSuperAdmin, updateUser, type UserDto } from '@/api/usersApi';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from 'sonner';
-import { Loader2, UserPlus, Users, CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, Edit3, Loader2, MoreVertical, Trash2, UserPlus, Users, XCircle } from 'lucide-react';
 
 export function UsersPage() {
   const qc = useQueryClient();
@@ -19,11 +24,34 @@ export function UsersPage() {
 
   const [email, setEmail] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [activeActionUserId, setActiveActionUserId] = useState<string | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserDto | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editEmail, setEditEmail] = useState('');
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editCompanyName, setEditCompanyName] = useState('');
+  const [editRoles, setEditRoles] = useState<string[]>([]);
+  const [editApproved, setEditApproved] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  const roleOptions = useMemo(
+    () => [
+      'SUPER_ADMIN',
+      'ORG_ADMIN',
+      'WAREHOUSE_MANAGER',
+      'INVENTORY_CONTROLLER',
+      'OPERATOR',
+      'VIEWER',
+      'AUDITOR'
+    ],
+    []
+  );
 
   const create = useMutation({
     mutationFn: createUser,
@@ -43,6 +71,40 @@ export function UsersPage() {
     }
   });
 
+  const edit = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<UserDto> }) =>
+      updateUser(id, payload),
+    onSuccess: () => {
+      toast.success('User updated successfully', {
+        description: 'Changes saved and user information refreshed.'
+      });
+      qc.invalidateQueries({ queryKey: ['users'] });
+      resetEditState();
+    },
+    onError: (mutationError: any) => {
+      console.error('Failed to update user:', mutationError);
+      const errorMessage = mutationError?.message || 'Unable to update user';
+      setEditError(errorMessage);
+      toast.error('Failed to update user', { description: errorMessage });
+    }
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteUser(id),
+    onSuccess: () => {
+      toast.success('User deleted successfully', {
+        description: 'The user has been removed from the system.'
+      });
+      qc.invalidateQueries({ queryKey: ['users'] });
+      closeDeleteDialog();
+    },
+    onError: (mutationError: any) => {
+      console.error('Failed to delete user:', mutationError);
+      const errorMessage = mutationError?.message || 'Unable to delete user';
+      toast.error('Failed to delete user', { description: errorMessage });
+    }
+  });
+
   const handleCreateUser = () => {
     if (!email.trim()) {
       setValidationError('Email is required');
@@ -56,6 +118,70 @@ export function UsersPage() {
 
     setValidationError(null);
     create.mutate(email.trim());
+  };
+
+  const openEditDialog = (user: UserDto) => {
+    setSelectedUser(user);
+    setEditEmail(user.email || '');
+    setEditDisplayName(user.displayName || '');
+    setEditCompanyName(user.companyName || '');
+    setEditRoles(user.roles ?? []);
+    setEditApproved(Boolean(user.approved));
+    setEditError(null);
+    setIsEditDialogOpen(true);
+  };
+
+  const closeEditDialog = () => {
+    setIsEditDialogOpen(false);
+    setSelectedUser(null);
+    setEditError(null);
+  };
+
+  const handleEditSubmit = () => {
+    if (!selectedUser) return;
+    if (!editEmail.trim()) {
+      setEditError('Email is required');
+      return;
+    }
+    if (!validateEmail(editEmail.trim())) {
+      setEditError('Please provide a valid email address');
+      return;
+    }
+
+    edit.mutate({
+      id: selectedUser.id,
+      payload: {
+        email: editEmail.trim(),
+        displayName: editDisplayName.trim() || undefined,
+        companyName: editCompanyName.trim() || undefined,
+        roles: editRoles,
+        approved: editApproved
+      }
+    });
+  };
+
+  const resetEditState = () => {
+    closeEditDialog();
+  };
+
+  const openDeleteDialog = (user: UserDto) => {
+    setSelectedUser(user);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setSelectedUser(null);
+  };
+
+  const toggleRole = (role: string, checked: boolean) => {
+    setEditRoles(prev => {
+      if (checked) {
+        if (prev.includes(role)) return prev;
+        return [...prev, role];
+      }
+      return prev.filter(r => r !== role);
+    });
   };
 
   return (
@@ -144,6 +270,7 @@ export function UsersPage() {
                     <th className="p-4 font-semibold text-gray-900">Display Name</th>
                     <th className="p-4 font-semibold text-gray-900">Status</th>
                     <th className="p-4 font-semibold text-gray-900">Role</th>
+                    <th className="p-4 font-semibold text-gray-900 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -177,6 +304,45 @@ export function UsersPage() {
                           </span>
                         )}
                       </td>
+                      <td className="p-4 text-right">
+                        <Popover
+                          open={activeActionUserId === u.id}
+                          onOpenChange={(open) =>
+                            setActiveActionUserId(open ? u.id : null)
+                          }
+                        >
+                          <PopoverTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                              <span className="sr-only">Open actions</span>
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-48 space-y-2 p-3">
+                            <Button
+                              variant="ghost"
+                              className="w-full justify-start"
+                              onClick={() => {
+                                setActiveActionUserId(null);
+                                openEditDialog(u);
+                              }}
+                            >
+                              <Edit3 className="mr-2 h-4 w-4" />
+                              Edit user
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => {
+                                setActiveActionUserId(null);
+                                openDeleteDialog(u);
+                              }}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete user
+                            </Button>
+                          </PopoverContent>
+                        </Popover>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -195,6 +361,169 @@ export function UsersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit User Dialog */}
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeEditDialog();
+          }
+        }}
+      >
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user details, roles, and approval status.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                value={editEmail}
+                onChange={(event) => {
+                  setEditEmail(event.target.value);
+                  if (editError) setEditError(null);
+                }}
+                placeholder="user@example.com"
+                disabled={edit.isPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-display-name">Display name</Label>
+              <Input
+                id="edit-display-name"
+                value={editDisplayName}
+                onChange={(event) => setEditDisplayName(event.target.value)}
+                placeholder="Jane Doe"
+                disabled={edit.isPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-company-name">Company name</Label>
+              <Input
+                id="edit-company-name"
+                value={editCompanyName}
+                onChange={(event) => setEditCompanyName(event.target.value)}
+                placeholder="Acme Corp"
+                disabled={edit.isPending}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Roles</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {roleOptions.map(role => {
+                  const checked = editRoles.includes(role);
+                  return (
+                    <label
+                      key={role}
+                      className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium text-gray-700"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(value) =>
+                          toggleRole(role, value === true)
+                        }
+                        disabled={edit.isPending}
+                      />
+                      <span className="uppercase tracking-wide text-xs font-semibold text-gray-600">
+                        {role.replace(/_/g, ' ')}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex items-center justify-between rounded-md border px-3 py-2">
+              <div>
+                <Label htmlFor="edit-approved">Approved</Label>
+                <p className="text-sm text-gray-500">
+                  Approved users can access the system.
+                </p>
+              </div>
+              <Switch
+                id="edit-approved"
+                checked={editApproved}
+                onCheckedChange={(value) => setEditApproved(value)}
+                disabled={edit.isPending}
+              />
+            </div>
+            {editError && (
+              <p className="text-sm text-red-600">{editError}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeEditDialog}
+              disabled={edit.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleEditSubmit}
+              disabled={edit.isPending}
+            >
+              {edit.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Dialog */}
+      <Dialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeDeleteDialog();
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete user</DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. The user will lose access immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <p className="text-sm text-gray-600">
+            Are you sure you want to delete{' '}
+            <span className="font-medium">{selectedUser?.email}</span>?
+          </p>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={closeDeleteDialog}
+              disabled={remove.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                if (!selectedUser) return;
+                remove.mutate(selectedUser.id);
+              }}
+              disabled={remove.isPending}
+            >
+              {remove.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

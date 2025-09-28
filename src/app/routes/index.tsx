@@ -23,7 +23,7 @@ export function Router() {
         <Route path="/transfers" element={<RequireAuth><TransfersPage /></RequireAuth>} />
         <Route path="/receiving" element={<RequireAuth><ReceivingPage /></RequireAuth>} />
         <Route path="/shipping" element={<RequireAuth><ShippingPage /></RequireAuth>} />
-        <Route path="/users" element={<RequireAuth requiredPermission="users.manage"><UsersPage /></RequireAuth>} />
+        <Route path="/users" element={<RequireAuth><UsersPage /></RequireAuth>} />
         <Route path="/admin/approvals" element={<RequireAuth><AdminApprovalsPage /></RequireAuth>} />
         <Route path="/reports" element={<RequireAuth><ReportsPage /></RequireAuth>} />
         <Route path="/attachments" element={<RequireAuth><AttachmentsPage /></RequireAuth>} />
